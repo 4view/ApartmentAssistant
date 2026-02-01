@@ -1,0 +1,47 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApartmentAssistant.Core", "ApartmentAssistant.Core\ApartmentAssistant.Core.csproj", "{AF855297-E935-F189-7E15-AB288040BCB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApartmentAssistant.Data", "ApartmentAssistant.Data\ApartmentAssistant.Data.csproj", "{603B7ED5-5EF0-1C75-143A-070739F87D72}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApartmentAssistant.Selenium", "ApartmentAssistant.Selenium", "{6AAABE21-A06F-19E1-766C-698E46FFBA60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApartmentAssistant.Telegram", "ApartmentAssistant.Telegram\ApartmentAssistant.Telegram.csproj", "{4DD745A8-E523-2F7D-D198-6AFB69FC8C1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApartmentAssisnant.Selenium", "ApartmentAssistant.Selenium\ApartmentAssisnant.Selenium.csproj", "{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF855297-E935-F189-7E15-AB288040BCB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF855297-E935-F189-7E15-AB288040BCB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF855297-E935-F189-7E15-AB288040BCB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF855297-E935-F189-7E15-AB288040BCB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{603B7ED5-5EF0-1C75-143A-070739F87D72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{603B7ED5-5EF0-1C75-143A-070739F87D72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{603B7ED5-5EF0-1C75-143A-070739F87D72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{603B7ED5-5EF0-1C75-143A-070739F87D72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DD745A8-E523-2F7D-D198-6AFB69FC8C1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DD745A8-E523-2F7D-D198-6AFB69FC8C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DD745A8-E523-2F7D-D198-6AFB69FC8C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD745A8-E523-2F7D-D198-6AFB69FC8C1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A70DCEE0-2BC1-91AF-86BC-19398D75C5EA} = {6AAABE21-A06F-19E1-766C-698E46FFBA60}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41AA907D-7B20-46DC-8111-A6B39408F02B}
+	EndGlobalSection
+EndGlobal
