@@ -11,25 +11,25 @@ public class CapthcaSessionService
         _logger = logger;
     }
 
-    public void CreateSession(long userId)
+    public void CreateSession(long chatId)
     {
-        _session[userId] = new CaptchaSession
+        _session[chatId] = new CaptchaSession
         {
-            UserId = userId,
+            UserId = chatId,
             Attempts = 0,
             ExpiryTime = DateTime.UtcNow.AddMinutes(3),
         };
 
-        _logger.LogInformation($"Созданна сессия для пользователя {userId}");
+        _logger.LogInformation($"Созданна сессия для пользователя {chatId}");
     }
 
-    public CaptchaSession? GetSession(long userId)
+    public CaptchaSession? GetSession(long chatId)
     {
-        if (_session.TryGetValue(userId, out var session))
+        if (_session.TryGetValue(chatId, out var session))
         {
             if (session.IsExpired)
             {
-                _session.Remove(userId);
+                _session.Remove(chatId);
                 return null;
             }
 
@@ -38,9 +38,9 @@ public class CapthcaSessionService
         return null;
     }
 
-    public void RemoveCompletedSession(long userId)
+    public void RemoveCompletedSession(long chatId)
     {
-        _session.Remove(userId);
-        _logger.LogInformation($"Сессия удалена для пользователя {userId}");
+        _session.Remove(chatId);
+        _logger.LogInformation($"Сессия удалена для пользователя {chatId}");
     }
 }
