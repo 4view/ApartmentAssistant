@@ -7,6 +7,7 @@ public class SeleniumService
     private readonly ILogger<SeleniumService> _logger;
 
     private readonly ChromeDriver _driver;
+
     private readonly WebDriverWait _wait;
 
     public SeleniumService(CapthcaSessionService capthcaSession, ILogger<SeleniumService> logger)
@@ -70,6 +71,9 @@ public class SeleniumService
         }
     }
 
+    /// <summary>
+    /// Проверяет существует ли искомый элемент
+    /// </summary>
     private bool IsElementExist(By by)
     {
         try
@@ -83,6 +87,10 @@ public class SeleniumService
         }
     }
 
+    /// <summary>
+    /// Отчищает поля для ввода
+    /// </summary>
+    /// <param name="webElements"></param>
     private void ClearInputFields(params IWebElement[] webElements)
     {
         foreach (var item in webElements)
@@ -165,7 +173,6 @@ public class SeleniumService
     /// Создает скриншот с изображением капчи
     /// </summary>
     /// <param name="captchaElement">Веб элемент капчи</param>
-    /// <returns>Массив байтов</returns>
     private byte[] TakeElementScreenshot(IWebElement captchaElement)
     {
         var location = captchaElement.Location;
