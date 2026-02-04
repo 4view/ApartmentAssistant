@@ -15,8 +15,12 @@ builder.Services.AddSingleton<ITelegramBotClient>(provider =>
 builder.Services.AddSingleton<CapthcaSessionService>();
 builder.Services.AddSingleton<CaptchaProcessor>();
 builder.Services.AddSingleton<SeleniumService>();
+builder.Services.AddSingleton<NotificationService>();
+
 builder.Services.AddScoped<DataHandlingService>();
+
 builder.Services.AddHostedService<TelegramMessageHandler>();
+builder.Services.AddHostedService<TelegramNotificator>();
 
 builder.Services.AddLogging();
 
