@@ -17,7 +17,7 @@ public class SeleniumService
 
         var options = new ChromeOptions();
         options.AddArguments(
-            // "--headless", // Для работы без GUI
+            "--headless", // Для работы без GUI
             "--no-sandbox", // Для Linux
             "--disable-dev-shm-usage",
             "--window-size=1920,1080"
@@ -56,12 +56,9 @@ public class SeleniumService
                 {
                     return false;
                 }
-                else
-                {
-                    _driver.Quit();
-                    return true;
-                }
             }
+
+            _driver.Quit();
             return true;
         }
         catch (Exception ex)
