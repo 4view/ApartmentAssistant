@@ -12,12 +12,9 @@ builder.Services.AddSingleton<ITelegramBotClient>(provider =>
     return new TelegramBotClient(settings.Token);
 });
 
-builder.Services.AddSingleton<CapthcaSessionService>();
-builder.Services.AddSingleton<CaptchaProcessor>();
+builder.Services.AddSingleton<CapthcaService>();
 builder.Services.AddSingleton<SeleniumService>();
 builder.Services.AddSingleton<NotificationService>();
-
-builder.Services.AddScoped<DataHandlingService>();
 
 builder.Services.AddHostedService<TelegramMessageHandler>();
 builder.Services.AddHostedService<TelegramNotificator>();
@@ -30,6 +27,6 @@ using var scope = app.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 dbContext.Database.Migrate();
 
-// app.MapGet("/", () => "Bot is running!");
+app.MapGet("/", () => "Bot is running!");
 
 app.Run();
