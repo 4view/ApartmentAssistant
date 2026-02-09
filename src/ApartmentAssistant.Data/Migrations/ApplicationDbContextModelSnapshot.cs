@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
+namespace ApartmentAssistant.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -43,8 +43,8 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
                     b.Property<decimal>("KitchenHotWater")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -55,11 +55,11 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
 
             modelBuilder.Entity("ApartmentAssistant.Core.Entities.UserEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Login")
                         .IsRequired()
@@ -86,8 +86,8 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
                     b.Property<DateTimeOffset>("NotificationDateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

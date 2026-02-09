@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
+namespace ApartmentAssistant.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251019083814_NewParamForUser")]
-    partial class NewParamForUser
+    [Migration("20260208075049_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,8 +46,8 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
                     b.Property<decimal>("KitchenHotWater")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -58,11 +58,11 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
 
             modelBuilder.Entity("ApartmentAssistant.Core.Entities.UserEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Login")
                         .IsRequired()
@@ -77,15 +77,48 @@ namespace ApartmentAssistant.Data.src.ApartmentAssistant.Data.Migrations
                     b.ToTable("UserEntity");
                 });
 
+            modelBuilder.Entity("NotificationHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("NotificationDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NotificationHistoryEntity");
+                });
+
             modelBuilder.Entity("ApartmentAssistant.Core.Entities.TenementIndicationEntity", b =>
                 {
-                    b.HasOne("ApartmentAssistant.Core.Entities.UserEntity", "user")
+                    b.HasOne("ApartmentAssistant.Core.Entities.UserEntity", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("user");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NotificationHistoryEntity", b =>
+                {
+                    b.HasOne("ApartmentAssistant.Core.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
