@@ -7,7 +7,7 @@ public class TenementInidications
 {
     public Guid Id { get; set; }
 
-    public int UserId { get; set; }
+    public long UserId { get; set; }
 
     public required User user { get; set; }
 
