@@ -2,22 +2,19 @@
 
 public class SeleniumService
 {
-    private readonly CapthcaSessionService _captchaService;
-
     private readonly ILogger<SeleniumService> _logger;
 
     private readonly ChromeDriver _driver;
 
     private readonly WebDriverWait _wait;
 
-    public SeleniumService(CapthcaSessionService capthcaSession, ILogger<SeleniumService> logger)
+    public SeleniumService(ILogger<SeleniumService> logger)
     {
-        _captchaService = capthcaSession;
         _logger = logger;
 
         var options = new ChromeOptions();
         options.AddArguments(
-            "--headless", // Для работы без GUI
+            //"--headless", // Для работы без GUI
             "--no-sandbox", // Для Linux
             "--disable-dev-shm-usage",
             "--window-size=1920,1080"
@@ -28,8 +25,11 @@ public class SeleniumService
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(3));
     }
 
+    // /html/body/div/div[4]/div/div[1]/div - alertError (alert alert-error)
+    /// /html/body/div/div[4]/div/div[1]/div - alertSucces (alert alert-success)
+
     /// <summary>
-    /// Метод для авторизации на сайте
+    /// Авторизация на сайте
     /// </summary>
     public bool Authorization(UserEntity user, string captchaText)
     {
@@ -58,7 +58,7 @@ public class SeleniumService
                 }
             }
 
-            _driver.Quit();
+            //_driver.Quit();
             return true;
         }
         catch (Exception ex)
@@ -66,6 +66,41 @@ public class SeleniumService
             _logger.LogError(ex.Message);
             return false;
         }
+    }
+
+    /// <summary>
+    /// Передаем показания <paramref name="indications"/> счетчиков в поля для ввода
+    /// </summary>
+    public void InputTenementIndications(TenementIndicationEntity indications)
+    {
+        var link = _driver.FindElement(By.XPath("//*[@id=\"nav-collapse-subhead\"]/ul/li[4]/a"));
+        link.Click();
+
+        var kitchenColdWaterInput = _driver.FindElement(
+            By.XPath(
+                "//table[@class=\"table table-bordered table-striped\"]/tbody/tr[1]/td[6]/input[1]"
+            )
+        );
+        var kitchenHotWaterInput = _driver.FindElement(
+            By.XPath(
+                "//table[@class=\"table table-bordered table-striped\"]/tbody/tr[4]/td[6]/input[1]"
+            )
+        );
+        var bathroomColdWaterInput = _driver.FindElement(
+            By.XPath(
+                "//table[@class=\"table table-bordered table-striped\"]/tbody/tr[2]/td[6]/input[1]"
+            )
+        );
+        var bathroomHotWaterInput = _driver.FindElement(
+            By.XPath(
+                "//table[@class=\"table table-bordered table-striped\"]/tbody/tr[3]/td[6]/input[1]"
+            )
+        );
+
+        kitchenColdWaterInput.SendKeys(indications.KitchenColdWater.ToString());
+        kitchenHotWaterInput.SendKeys(indications.KitchenHotWater.ToString());
+        bathroomColdWaterInput.SendKeys(indications.BathroomColdWater.ToString());
+        bathroomHotWaterInput.SendKeys(indications.BathroomHotWater.ToString());
     }
 
     /// <summary>
