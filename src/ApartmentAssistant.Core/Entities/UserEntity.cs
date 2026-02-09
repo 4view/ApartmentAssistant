@@ -2,7 +2,7 @@ namespace ApartmentAssistant.Core.Entities;
 
 public class UserEntity
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     public string Login { get; set; } = string.Empty;
 

@@ -4,7 +4,7 @@ public class NotificationHistoryEntity
 {
     public Guid Id { get; set; }
 
-    public int UserId { get; set; }
+    public long UserId { get; set; }
 
     public UserEntity? User { get; set; }
 

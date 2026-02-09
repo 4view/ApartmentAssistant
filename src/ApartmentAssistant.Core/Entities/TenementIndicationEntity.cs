@@ -7,7 +7,7 @@ public class TenementIndicationEntity
 {
     public Guid Id { get; set; }
 
-    public int UserId { get; set; }
+    public long UserId { get; set; }
 
     public UserEntity? User { get; set; }
 
