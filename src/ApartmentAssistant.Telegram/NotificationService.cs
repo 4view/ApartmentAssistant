@@ -6,6 +6,9 @@ public class NotificationService(
 {
     private readonly DateTimeOffset LocalTime = DateTimeOffset.Now;
 
+    /// <summary>
+    /// Проверяет и уведомляет пользователя в случае отсутсвия уведомлений
+    /// </summary>
     public async Task CheckAndNotifyAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation(
@@ -18,25 +21,24 @@ public class NotificationService(
 
         var notificationTimes = new[]
         {
-            new TimeOnly(10, 0, 0),
-            new TimeOnly(13, 4, 0),
-            new TimeOnly(13, 11, 0),
+            new TimeOnly(10, 44, 50),
+            new TimeOnly(14, 53, 20),
+            new TimeOnly(18, 46, 10),
         };
 
         foreach (var time in notificationTimes)
         {
-            if (Math.Abs((currentTime - time.ToTimeSpan()).TotalMinutes) <= 1)
+            var timeSpan = time.ToTimeSpan();
+            var timeDifference = timeSpan - currentTime;
+
+            if (Math.Abs((currentTime - time.ToTimeSpan()).TotalSeconds) <= 10)
             {
                 _logger.LogInformation("\u001b[32mPROCESS: Отправка уведомления пользователям!");
                 foreach (var user in users)
                 {
                     if (!await WasNotifiedToday(user, time))
                     {
-                        await _botClient.SendMessage(
-                            user.Id,
-                            "Test notification",
-                            cancellationToken: cancellationToken
-                        );
+                        await NotificateUser(user.Id, cancellationToken);
 
                         await AddUserNotificationHistoryAsync(user, time);
                     }
@@ -49,11 +51,54 @@ public class NotificationService(
             }
             else
             {
-                _logger.LogInformation($"Время {time} еще не наступило");
+                if (timeDifference > TimeSpan.Zero)
+                {
+                    _logger.LogInformation(
+                        $"Время {time} еще не наступило, до наступления {timeDifference:hh\\:mm\\:ss}"
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        $"Время {time} уже прошло {(-timeDifference):hh\\:mm\\:ss} назад"
+                    );
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Сообщение уведомляющее пользователя о небходимости внести показания
+    /// </summary>
+    /// <param name="chatId">Чат пользователя</param>
+    private async Task NotificateUser(long chatId, CancellationToken cancellationToken)
+    {
+        var inlineKeyboard = new InlineKeyboardMarkup(
+            new[]
+            {
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(
+                    "Внести показания",
+                    "\nКухня:\n"
+                        + "Горячая вода =\n"
+                        + "Холодная вода =\n\n"
+                        + "Ванная:\n"
+                        + "Горячая вода =\n"
+                        + "Холодная вода ="
+                ),
+            }
+        );
+
+        await _botClient.SendMessage(
+            chatId,
+            "НАПОМИНАНИЕ! \nНеобходимо внести показаний счетчиков: ",
+            replyMarkup: inlineKeyboard,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    /// <summary>
+    /// Проверяет, был ли пользователь <paramref name="user"/> уведомлен в это <paramref name="time"/> время
+    /// </summary>
     public async Task<bool> WasNotifiedToday(UserEntity user, TimeOnly time)
     {
         using (var scope = serviceScopeFactory.CreateScope())
@@ -70,7 +115,7 @@ public class NotificationService(
     }
 
     /// <summary>
-    /// Проверяем начался ли период, когда необходимо начать уведомлять пользователей
+    /// Проверяет начался ли период, когда необходимо начать уведомлять пользователей
     /// </summary>
     public bool IsNotificationPeriodStart()
     {
@@ -82,7 +127,7 @@ public class NotificationService(
     }
 
     /// <summary>
-    /// Добовляем запись в историю уведомлений
+    /// Добовляет запись уведомления пользователя в бд
     /// </summary>
     /// <param name="user">пользователь которому пришло уведомление</param>
     public async Task AddUserNotificationHistoryAsync(UserEntity user, TimeOnly notificationTime)
@@ -105,6 +150,9 @@ public class NotificationService(
         }
     }
 
+    /// <summary>
+    /// Формирует дату с определенным <paramref name="time"/> временем
+    /// </summary>
     private DateTimeOffset GetDateWithSpecifiedTime(TimeOnly time)
     {
         var currentDateTime = DateTimeOffset.UtcNow;
@@ -116,7 +164,7 @@ public class NotificationService(
     }
 
     /// <summary>
-    /// Получаем список пользователй которых необходимо уведомить
+    /// Получает список пользователй которых необходимо уведомить
     /// </summary>
     public async Task<List<UserEntity>> UserToNotificateAsync()
     {
