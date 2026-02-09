@@ -1,4 +1,6 @@
-﻿namespace ApartmentAssisnant.Selenium;
+﻿using System.Threading.Tasks;
+
+namespace ApartmentAssisnant.Selenium;
 
 public class SeleniumService
 {
@@ -27,7 +29,6 @@ public class SeleniumService
 
     // /html/body/div/div[4]/div/div[1]/div - alertError (alert alert-error)
     /// /html/body/div/div[4]/div/div[1]/div - alertSucces (alert alert-success)
-
     /// <summary>
     /// Авторизация на сайте
     /// </summary>
@@ -58,7 +59,6 @@ public class SeleniumService
                 }
             }
 
-            //_driver.Quit();
             return true;
         }
         catch (Exception ex)
@@ -71,10 +71,14 @@ public class SeleniumService
     /// <summary>
     /// Передаем показания <paramref name="indications"/> счетчиков в поля для ввода
     /// </summary>
-    public void InputTenementIndications(TenementIndicationEntity indications)
+    public async Task<ActionResponse> InputTenementIndications(TenementIndicationEntity indications)
     {
         var link = _driver.FindElement(By.XPath("//*[@id=\"nav-collapse-subhead\"]/ul/li[4]/a"));
         link.Click();
+
+        var submitButton = _driver.FindElement(
+            By.XPath("//input[contains(@onclick, 'this.form.submit();')]")
+        );
 
         var kitchenColdWaterInput = _driver.FindElement(
             By.XPath(
@@ -101,6 +105,39 @@ public class SeleniumService
         kitchenHotWaterInput.SendKeys(indications.KitchenHotWater.ToString());
         bathroomColdWaterInput.SendKeys(indications.BathroomColdWater.ToString());
         bathroomHotWaterInput.SendKeys(indications.BathroomHotWater.ToString());
+        await Task.Delay(1000);
+        submitButton.Click();
+
+        try
+        {
+            var alertError = _driver.FindElements(By.XPath("//div[@class=\"alert alert-error\"]"));
+
+            var alertSucces = _driver.FindElements(
+                By.XPath("//div[@class=\"alert alert-success\"]")
+            );
+
+            if (alertSucces.Count > 0)
+            {
+                var successText = alertSucces[0].Text;
+                return new ActionResponse { SuccessResponse = $"{successText}" };
+            }
+            else if (alertError.Count > 0)
+            {
+                var errorText = alertError[0].Text;
+                return new ActionResponse { ErrorResponse = $"{errorText}" };
+            }
+            else
+            {
+                return new ActionResponse
+                {
+                    ErrorResponse = "Не удалось определить результат операции!",
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            return new ActionResponse { ErrorResponse = $"Произошла ошибка: {ex.Message}" };
+        }
     }
 
     /// <summary>
