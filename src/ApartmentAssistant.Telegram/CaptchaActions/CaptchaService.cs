@@ -1,26 +1,24 @@
-namespace ApartmentAssistant.Telegram.CaptchaActions;
+namespace ApartmentAssistant.Telegram.CaptchaSolver;
 
-public class CaptchaProcessor
+public class CapthcaService
 {
     private readonly SeleniumService _seleniumService;
 
     private readonly ITelegramBotClient _botClient;
 
-    private readonly ILogger<CaptchaProcessor> _logger;
+    private readonly Dictionary<long, CaptchaSession> _session = new();
 
-    private readonly CapthcaSessionService _captchaService;
+    private readonly ILogger<CapthcaService> _logger;
 
-    public CaptchaProcessor(
+    public CapthcaService(
         SeleniumService seleniumService,
-        ITelegramBotClient botClient,
-        ILogger<CaptchaProcessor> logger,
-        CapthcaSessionService captchaService
+        ITelegramBotClient bot,
+        ILogger<CapthcaService> logger
     )
     {
         _seleniumService = seleniumService;
-        _botClient = botClient;
+        _botClient = bot;
         _logger = logger;
-        _captchaService = captchaService;
     }
 
     /// <summary>
@@ -51,9 +49,8 @@ public class CaptchaProcessor
     }
 
     /// <summary>
-    /// Обрабатываем ответ пользователя на отправленное изображение капчи
+    /// Процесс обработки ответа пользователя на капчу
     /// </summary>
-    /// <returns>Успешно ли прошла авторизация</returns>
     public async Task<bool> ProcessCaptchaAnswer(
         UserEntity user,
         long chatId,
@@ -124,10 +121,44 @@ public class CaptchaProcessor
                     $"Пользователь {chatId} превысил максимальное кол-во попыток"
                 );
 
-                _captchaService.RemoveCompletedSession(chatId);
+                RemoveCompletedSession(chatId);
 
                 return false;
             }
         }
+    }
+
+    public void CreateSession(long chatId, TenementIndicationEntity indications)
+    {
+        _session[chatId] = new CaptchaSession
+        {
+            UserId = chatId,
+            Attempts = 0,
+            Indications = indications,
+            ExpiryTime = DateTime.UtcNow.AddMinutes(3),
+        };
+
+        _logger.LogInformation($"Созданна сессия для пользователя {chatId}");
+    }
+
+    public CaptchaSession? GetSession(long chatId)
+    {
+        if (_session.TryGetValue(chatId, out var session))
+        {
+            if (session.IsExpired)
+            {
+                _session.Remove(chatId);
+                return null;
+            }
+
+            return session;
+        }
+        return null;
+    }
+
+    public void RemoveCompletedSession(long chatId)
+    {
+        _session.Remove(chatId);
+        _logger.LogInformation($"Сессия удалена для пользователя {chatId}");
     }
 }
