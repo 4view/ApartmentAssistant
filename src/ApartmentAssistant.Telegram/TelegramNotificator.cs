@@ -33,7 +33,7 @@ public class TelegramNotificator : BackgroundService
                     break;
                 }
             }
-            await Task.Delay(2000);
+            await Task.Delay(1000);
         }
     }
 }
