@@ -1,10 +1,11 @@
+global using System.Globalization;
 global using ApartmentAssisnant.Selenium;
-global using ApartmentAssistant.Core.CaptchaSolver;
 global using ApartmentAssistant.Core.Entities;
 global using ApartmentAssistant.Core.Models;
 global using ApartmentAssistant.Data;
-global using ApartmentAssistant.Telegram.CaptchaActions;
+global using ApartmentAssistant.Telegram.CaptchaSolver;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Options;
 global using Telegram.Bot;
 global using Telegram.Bot.Types;
+global using Telegram.Bot.Types.ReplyMarkups;
