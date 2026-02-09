@@ -1,4 +1,3 @@
-global using ApartmentAssistant.Core.CaptchaSolver;
 global using ApartmentAssistant.Core.Entities;
 global using Microsoft.Extensions.Logging;
 global using OpenQA.Selenium;
