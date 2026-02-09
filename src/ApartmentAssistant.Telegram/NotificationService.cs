@@ -22,7 +22,7 @@ public class NotificationService(
         var notificationTimes = new[]
         {
             new TimeOnly(10, 44, 50),
-            new TimeOnly(14, 53, 20),
+            new TimeOnly(15, 04, 0),
             new TimeOnly(18, 46, 10),
         };
 
