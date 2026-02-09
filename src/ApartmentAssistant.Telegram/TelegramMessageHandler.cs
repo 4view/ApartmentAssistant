@@ -88,11 +88,28 @@ public class TelegramMessageHandler : BackgroundService
                 cancellationToken
             );
 
-            _seleniumService.InputTenementIndications(session.Indications);
+            var inputRespose = await _seleniumService.InputTenementIndications(session.Indications);
 
             if (result)
             {
                 _captchaService.RemoveCompletedSession(userId);
+            }
+
+            if (inputRespose.ErrorResponse == null)
+            {
+                await _botClient.SendMessage(
+                    chatId,
+                    $"{inputRespose.SuccessResponse}",
+                    cancellationToken: cancellationToken
+                );
+            }
+            else
+            {
+                await _botClient.SendMessage(
+                    chatId,
+                    $"{inputRespose.ErrorResponse}",
+                    cancellationToken: cancellationToken
+                );
             }
 
             return;
