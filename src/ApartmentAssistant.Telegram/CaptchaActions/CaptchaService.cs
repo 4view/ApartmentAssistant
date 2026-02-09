@@ -128,6 +128,55 @@ public class CapthcaService
         }
     }
 
+    public async Task CheckSession(
+        long chatId,
+        UserEntity user,
+        Message message,
+        CancellationToken cancellationToken
+    )
+    {
+        var session = GetSession(chatId);
+
+        if (session != null && !session.IsExpired)
+        {
+            _logger.LogInformation($"Обработка ответа на капчу для пользователя {session.UserId}");
+
+            var result = await ProcessCaptchaAnswer(
+                user,
+                chatId,
+                message.Text,
+                session,
+                cancellationToken
+            );
+
+            var inputRespose = await _seleniumService.InputTenementIndications(session.Indications);
+
+            if (result)
+            {
+                RemoveCompletedSession(chatId);
+            }
+
+            if (inputRespose.ErrorResponse == null)
+            {
+                await _botClient.SendMessage(
+                    chatId,
+                    $"{inputRespose.SuccessResponse}",
+                    cancellationToken: cancellationToken
+                );
+            }
+            else
+            {
+                await _botClient.SendMessage(
+                    chatId,
+                    $"{inputRespose.ErrorResponse}",
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            return;
+        }
+    }
+
     public void CreateSession(long chatId, TenementIndicationEntity indications)
     {
         _session[chatId] = new CaptchaSession
