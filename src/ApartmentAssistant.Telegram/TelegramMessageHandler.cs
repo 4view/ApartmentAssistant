@@ -8,22 +8,17 @@ public class TelegramMessageHandler : BackgroundService
 
     private readonly CapthcaService _captchaService;
 
-    private readonly SeleniumService _seleniumService;
-
-    //
     public TelegramMessageHandler(
         ILogger<TelegramMessageHandler> logger,
         ITelegramBotClient bot,
         IServiceScopeFactory factory,
-        CapthcaService captchaService,
-        SeleniumService seleniumService
+        CapthcaService captchaService
     )
     {
         _scopeFactory = factory;
         _logger = logger;
         _botClient = bot;
         _captchaService = captchaService;
-        _seleniumService = seleniumService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -73,47 +68,7 @@ public class TelegramMessageHandler : BackgroundService
             return;
         }
 
-        var session = _captchaService.GetSession(userId);
-
-        // Если есть сессия с пользователем то ждем ответа на капчу
-        if (session != null && !session.IsExpired)
-        {
-            _logger.LogInformation($"Обработка ответа на капчу для пользователя {session.UserId}");
-
-            var result = await _captchaService.ProcessCaptchaAnswer(
-                user,
-                chatId,
-                message.Text,
-                session,
-                cancellationToken
-            );
-
-            var inputRespose = await _seleniumService.InputTenementIndications(session.Indications);
-
-            if (result)
-            {
-                _captchaService.RemoveCompletedSession(userId);
-            }
-
-            if (inputRespose.ErrorResponse == null)
-            {
-                await _botClient.SendMessage(
-                    chatId,
-                    $"{inputRespose.SuccessResponse}",
-                    cancellationToken: cancellationToken
-                );
-            }
-            else
-            {
-                await _botClient.SendMessage(
-                    chatId,
-                    $"{inputRespose.ErrorResponse}",
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            return;
-        }
+        await _captchaService.CheckSession(chatId, user, message, cancellationToken);
 
         try
         {
