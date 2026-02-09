@@ -2,28 +2,28 @@ public class TelegramMessageHandler : BackgroundService
 {
     private readonly ILogger<TelegramMessageHandler> _logger;
 
-    private readonly CaptchaProcessor _captchaProcessor;
-
     private readonly IServiceScopeFactory _scopeFactory;
 
     private readonly ITelegramBotClient _botClient;
 
-    private readonly CapthcaSessionService _captchaService;
+    private readonly CapthcaService _captchaService;
+
+    private readonly SeleniumService _seleniumService;
 
     //
     public TelegramMessageHandler(
         ILogger<TelegramMessageHandler> logger,
         ITelegramBotClient bot,
         IServiceScopeFactory factory,
-        CapthcaSessionService captchaService,
-        CaptchaProcessor captchaProcessor
+        CapthcaService captchaService,
+        SeleniumService seleniumService
     )
     {
         _scopeFactory = factory;
         _logger = logger;
         _botClient = bot;
         _captchaService = captchaService;
-        _captchaProcessor = captchaProcessor;
+        _seleniumService = seleniumService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -80,13 +80,15 @@ public class TelegramMessageHandler : BackgroundService
         {
             _logger.LogInformation($"Обработка ответа на капчу для пользователя {session.UserId}");
 
-            var result = await _captchaProcessor.ProcessCaptchaAnswer(
+            var result = await _captchaService.ProcessCaptchaAnswer(
                 user,
                 chatId,
                 message.Text,
                 session,
                 cancellationToken
             );
+
+            _seleniumService.InputTenementIndications(session.Indications);
 
             if (result)
             {
@@ -98,20 +100,111 @@ public class TelegramMessageHandler : BackgroundService
 
         try
         {
-            if (text == "/start")
+            if (text == "/start") { }
+            else if (text.Contains("@TenementBot"))
             {
-                var isPageLoaded = false;
-                //Пользователь написал /Start и мы отправили ему изображение капчи
-                await _captchaProcessor.CaptureAndSendCaptchaAsync(chatId, isPageLoaded);
+                var indications = ParseUserIndications(text, userId);
 
-                // Добавили пользователя в сессию по обработке капчи
-                _captchaService.CreateSession(userId);
+                if (indications != null)
+                {
+                    var isPageLoaded = false;
+                    await _captchaService.CaptureAndSendCaptchaAsync(chatId, isPageLoaded);
+
+                    _captchaService.CreateSession(userId, indications);
+                }
+                else
+                {
+                    await _botClient.SendMessage(
+                        chatId,
+                        $"Некоторые поля были заполнены некорректно",
+                        cancellationToken: cancellationToken
+                    );
+                }
             }
-            else { }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка обработки сообщения");
         }
+    }
+
+    public TenementIndicationEntity? ParseUserIndications(string text, long userId)
+    {
+        text = text.Replace("@TenementBot", "").Trim();
+
+        var result = new TenementIndicationEntity()
+        {
+            UserId = userId,
+            ContributionDate = DateTimeOffset.Now,
+        };
+
+        var lines = text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+        var currentSection = "";
+
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+
+            if (
+                trimmedLine.StartsWith("Кухня", StringComparison.OrdinalIgnoreCase)
+                || trimmedLine.StartsWith("Кухня:", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                currentSection = "Кухня";
+                continue;
+            }
+
+            if (
+                trimmedLine.StartsWith("Ванная", StringComparison.OrdinalIgnoreCase)
+                || trimmedLine.StartsWith("Ванная:", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                currentSection = "Ванная";
+                continue;
+            }
+
+            if (trimmedLine.Contains("=") && !string.IsNullOrEmpty(currentSection))
+            {
+                var parts = trimmedLine.Split("=");
+
+                if (parts.Length == 2)
+                {
+                    var key = parts[0].Trim().ToLower();
+                    var valueStr = parts[1].Trim();
+
+                    if (
+                        decimal.TryParse(
+                            valueStr.Replace(".", ","),
+                            NumberStyles.Any,
+                            CultureInfo.InstalledUICulture,
+                            out var value
+                        )
+                    )
+                    {
+                        if (key.Contains("горячая") && currentSection == "Кухня")
+                            result.KitchenHotWater = value;
+                        if (key.Contains("холодная") && currentSection == "Кухня")
+                            result.KitchenColdWater = value;
+                        if (key.Contains("горячая") && currentSection == "Ванная")
+                            result.BathroomHotWater = value;
+                        if (key.Contains("холодная") && currentSection == "Ванная")
+                            result.BathroomColdWater = value;
+                    }
+                }
+            }
+        }
+
+        if (
+            result.BathroomColdWater == 0
+            || result.BathroomHotWater == 0
+            || result.KitchenColdWater == 0
+            || result.KitchenHotWater == 0
+        )
+        {
+            return null;
+        }
+
+        return result;
     }
 }
