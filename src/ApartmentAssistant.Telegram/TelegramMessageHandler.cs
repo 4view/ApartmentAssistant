@@ -6,18 +6,22 @@ public class TelegramMessageHandler : BackgroundService
 
     private readonly ITelegramBotClient _botClient;
 
+    private readonly RegistrationService _registrationService;
+
     private readonly CapthcaService _captchaService;
 
     public TelegramMessageHandler(
         ILogger<TelegramMessageHandler> logger,
         ITelegramBotClient bot,
         IServiceScopeFactory factory,
-        CapthcaService captchaService
+        CapthcaService captchaService,
+        RegistrationService regService
     )
     {
         _scopeFactory = factory;
         _logger = logger;
         _botClient = bot;
+        _registrationService = regService;
         _captchaService = captchaService;
     }
 
@@ -68,11 +72,19 @@ public class TelegramMessageHandler : BackgroundService
             return;
         }
 
-        await _captchaService.CheckSession(chatId, user, message, cancellationToken);
+        await _captchaService.CheckSessionAndInputIndicationsAsync(
+            chatId,
+            user,
+            message,
+            cancellationToken
+        );
 
         try
         {
-            if (text == "/start") { }
+            if (text == "/start")
+            {
+                await _registrationService.ProcessRegistration(chatId, cancellationToken);
+            }
             else if (text.Contains("@TenementBot"))
             {
                 var indications = ParseUserIndications(text, userId);

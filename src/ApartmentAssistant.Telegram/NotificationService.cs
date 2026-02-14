@@ -14,16 +14,16 @@ public class NotificationService(
         _logger.LogInformation(
             "\u001b[32mPROCESS: Началась выборка пользователей, которым нужно отправить уведомление"
         );
-        var users = await UserToNotificateAsync();
+        var users = await UserToNotificateAsync(cancellationToken);
 
         var now = DateTimeOffset.Now;
         var currentTime = now.TimeOfDay;
 
         var notificationTimes = new[]
         {
-            new TimeOnly(10, 44, 50),
-            new TimeOnly(15, 04, 0),
-            new TimeOnly(18, 46, 10),
+            new TimeOnly(12, 40, 00),
+            new TimeOnly(16, 14, 0),
+            new TimeOnly(22, 16, 50),
         };
 
         foreach (var time in notificationTimes)
@@ -166,22 +166,22 @@ public class NotificationService(
     /// <summary>
     /// Получает список пользователй которых необходимо уведомить
     /// </summary>
-    public async Task<List<UserEntity>> UserToNotificateAsync()
+    public async Task<List<UserEntity>> UserToNotificateAsync(CancellationToken cancellationToken)
     {
         using (var scope = serviceScopeFactory.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var currentMonth = DateTimeOffset.Now.Month;
 
-            var userToNotify = db.Set<UserEntity>()
+            var userToNotify = await db.Set<UserEntity>()
                 .Where(u =>
                     !db.Set<TenementIndicationEntity>()
                         .Where(t => t.UserId == u.Id)
                         .Any(t => t.ContributionDate.Month == currentMonth)
                 )
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-            return await userToNotify;
+            return userToNotify;
         }
     }
 }

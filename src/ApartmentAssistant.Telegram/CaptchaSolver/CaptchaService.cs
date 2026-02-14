@@ -128,7 +128,11 @@ public class CapthcaService
         }
     }
 
-    public async Task CheckSession(
+    /// <summary>
+    /// Проверяет есть ли действующая сессия авторизации при внесении показаний
+    /// </summary>
+    /// <param name="message">ответ на изображение с капчей</param>
+    public async Task CheckSessionAndInputIndicationsAsync(
         long chatId,
         UserEntity user,
         Message message,
